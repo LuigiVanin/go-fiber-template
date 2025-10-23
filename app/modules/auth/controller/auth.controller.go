@@ -4,7 +4,7 @@ import (
 	"boilerplate/app/common"
 	"boilerplate/app/middleware"
 	dto "boilerplate/app/models/dto"
-	auth "boilerplate/app/module/auth/service"
+	as "boilerplate/app/modules/auth/service"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -12,10 +12,10 @@ import (
 var _ common.IController = &AuthController{}
 
 type AuthController struct {
-	authService auth.IAuthService
+	authService as.IAuthService
 }
 
-func New(authService auth.IAuthService) *AuthController {
+func New(authService as.IAuthService) *AuthController {
 	return &AuthController{
 		authService: authService,
 	}

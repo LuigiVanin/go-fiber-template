@@ -1,7 +1,7 @@
 package database
 
 import (
-	"boilerplate/internal/database/models"
+	"boilerplate/infra/database/entity"
 	"fmt"
 
 	_ "github.com/lib/pq"
@@ -20,7 +20,7 @@ func CreateConnection(url string) (*gorm.DB, error) {
 }
 
 func Migrate(db *gorm.DB) error {
-	err := db.AutoMigrate(&models.User{})
+	err := db.AutoMigrate(&entity.User{})
 
 	if err != nil {
 		fmt.Printf("Failed to migrate database: %v", err)

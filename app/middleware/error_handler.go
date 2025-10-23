@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"boilerplate/app/common"
 	"fmt"
 
-	e "boilerplate/internal/errors"
+	"boilerplate/app/common"
+	e "boilerplate/infra/errors"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -21,6 +21,9 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 		}
 
 		status := common.HttpErrorMap[appErr.Code]
+		if status == 0 {
+			status = fiber.StatusInternalServerError
+		}
 		problemDetail := e.NewProblemDetail(
 			type_,
 			appErr.Title,

@@ -1,7 +1,7 @@
 package common
 
 import (
-	e "boilerplate/internal/errors"
+	e "boilerplate/infra/errors"
 
 	"github.com/gofiber/fiber/v2"
 )

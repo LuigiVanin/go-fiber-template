@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	bootstrap "boilerplate/app"
-	authController "boilerplate/app/module/auth/controller"
-	authService "boilerplate/app/module/auth/service"
-	userRepository "boilerplate/app/module/user/repository"
+	authController "boilerplate/app/modules/auth/controller"
+	authService "boilerplate/app/modules/auth/service"
+	userRepository "boilerplate/app/modules/user/repository"
 
-	"boilerplate/internal/configuration"
-	database "boilerplate/internal/database"
+	"boilerplate/infra/configuration"
+	"boilerplate/infra/database"
 )
 
 func main() {
