@@ -28,14 +28,6 @@ func ThrowBadRequest(detail string) *GlobalError {
 	}
 }
 
-func ThrowInternalServerError(detail string) *GlobalError {
-	return &GlobalError{
-		Title:  "Internal Server Error",
-		Code:   InternalServerErrorCode,
-		Detail: detail,
-	}
-}
-
 func ThrowConflict(detail string) *GlobalError {
 	return &GlobalError{
 		Title:  "Conflict",
@@ -53,7 +45,59 @@ func ThrowUserAlreadyExists(detail string) *GlobalError {
 	}
 }
 
+func ThrowNotFound(detail string) *GlobalError {
+	return &GlobalError{
+		Title:  "Not Found",
+		Code:   NotFoundErrorCode,
+		Detail: detail,
+		Type:   "https://example.com/errors/not-found",
+	}
+}
+
+func ThorwUnauthorizedError(detail string) *GlobalError {
+	return &GlobalError{
+		Title:  "Unauthorized",
+		Code:   UnauthorizedErrorCode,
+		Detail: detail,
+		Type:   "https://example.com/errors/unauthorized",
+	}
+}
+
+func ThrowUnprocessableEntity(detail string) *GlobalError {
+
+	return &GlobalError{
+		Title:  "Unprocessable Entity",
+		Code:   UnprocessableEntityErrorCode,
+		Detail: detail,
+		Type:   "https://example.com/errors/unprocessable-entity",
+	}
+}
+
+func ThrowInternalServerError(detail string) *GlobalError {
+	return &GlobalError{
+		Title:  "Internal Server Error",
+		Code:   InternalServerErrorCode,
+		Detail: detail,
+	}
+}
+
 func (e *GlobalError) Error() string {
 
 	return fmt.Sprintf("GlobalError: %s, Code: %s, Detail: %s", e.Title, e.Code, e.Detail)
+}
+
+func (e *GlobalError) IntoProblemDetail(instance string) *ProblemDetail {
+	status := HttpErrorMap[e.Code]
+	if status == 0 {
+		status = 500
+	}
+
+	return &ProblemDetail{
+		Type:     e.Type,
+		Title:    e.Title,
+		Status:   status,
+		Detail:   e.Detail,
+		Instance: instance,
+		Code:     string(e.Code),
+	}
 }

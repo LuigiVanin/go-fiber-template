@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	e "boilerplate/infra/errors"
+
 	v "github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
@@ -23,7 +25,7 @@ func validate[T any](payload T) error {
 	if err := validator.Struct(payload); err != nil {
 
 		if _, ok := err.(*v.InvalidValidationError); ok {
-			return err
+			return e.ThrowUnprocessableEntity(err.Error())
 		}
 
 		errors := []ValidationFieldError{}

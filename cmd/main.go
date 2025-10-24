@@ -6,6 +6,9 @@ import (
 	bootstrap "boilerplate/app"
 	authController "boilerplate/app/modules/auth/controller"
 	authService "boilerplate/app/modules/auth/service"
+	hashBcryptService "boilerplate/app/modules/hash"
+	jwtService "boilerplate/app/modules/jwt"
+
 	userRepository "boilerplate/app/modules/user/repository"
 
 	"boilerplate/infra/configuration"
@@ -15,8 +18,10 @@ import (
 func main() {
 	app := bootstrap.New()
 
-	env := configuration.NewEnvironment()
-	client := database.New(env.FormatDatabaseURL())
+	cfg := configuration.New()
+	client := database.New(
+		cfg.FormatDatabaseURL(),
+	)
 
 	err := database.Migrate(client)
 
@@ -29,11 +34,13 @@ func main() {
 
 	userRepository := userRepository.New(client)
 
-	authService := authService.New(userRepository)
+	jwtService := jwtService.New(cfg)
+	hashService := hashBcryptService.New(cfg)
+	authService := authService.New(hashService, jwtService, userRepository)
 
 	authController := authController.New(authService)
 
 	authController.Register(app)
 
-	app.Listen(":3000")
+	app.Listen(fmt.Sprintf(":%s", cfg.Server.Port))
 }

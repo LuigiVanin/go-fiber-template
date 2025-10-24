@@ -4,5 +4,5 @@ import "boilerplate/app/models/dto"
 
 type IAuthService interface {
 	SignIn(payload dto.LoginPaylod) error
-	SignUp(payload dto.SignUpPaylod) error
+	SignUp(payload dto.SignUpPaylod) (uint, error)
 }

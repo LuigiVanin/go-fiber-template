@@ -10,6 +10,7 @@ type ProblemDetail struct {
 	Status   int    `json:"status"`
 	Detail   string `json:"detail"`
 	Instance string `json:"instance"`
+	Code     string `json:"code"`
 }
 
 func (e *ProblemDetail) Error() string {
@@ -22,6 +23,7 @@ func NewProblemDetail(
 	status int,
 	detail string,
 	instance string,
+	code string,
 ) *ProblemDetail {
 	return &ProblemDetail{
 		Type:     type_,
@@ -29,5 +31,6 @@ func NewProblemDetail(
 		Status:   status,
 		Detail:   detail,
 		Instance: instance,
+		Code:     code,
 	}
 }

@@ -3,7 +3,6 @@ package middleware
 import (
 	"fmt"
 
-	"boilerplate/app/common"
 	e "boilerplate/infra/errors"
 
 	"github.com/gofiber/fiber/v2"
@@ -11,27 +10,14 @@ import (
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
 	instance := ctx.OriginalURL()
-	type_ := "about:blank"
-
 	fmt.Println("Error: ", err)
 	if appErr, ok := err.(*e.GlobalError); ok {
 
-		if appErr.Type != "" {
-			type_ = appErr.Type
-		}
+		problemDetail := appErr.IntoProblemDetail(instance)
 
-		status := common.HttpErrorMap[appErr.Code]
-		if status == 0 {
-			status = fiber.StatusInternalServerError
-		}
-		problemDetail := e.NewProblemDetail(
-			type_,
-			appErr.Title,
-			status,
-			appErr.Detail,
-			instance,
-		)
-		return ctx.Status(status).JSON(problemDetail)
+		return ctx.
+			Status(problemDetail.Status).
+			JSON(problemDetail)
 	}
 
 	if validationErr, ok := err.(ValidationError); ok {
@@ -42,6 +28,7 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 				"detail":   validationErr.Error(),
 				"instance": instance,
 				"errors":   validationErr.List,
+				"code":     string(e.BadRequestCode),
 			},
 		)
 	}
@@ -53,6 +40,7 @@ func ErrorHandler(ctx *fiber.Ctx, err error) error {
 			fiber.StatusInternalServerError,
 			err.Error(),
 			instance,
+			"",
 		),
 	)
 }

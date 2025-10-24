@@ -28,10 +28,7 @@ func (controller *AuthController) SignIn(ctx *fiber.Ctx) error {
 	err := controller.authService.SignIn(payload)
 
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to login",
-			"error":   err.Error(),
-		})
+		return err
 	}
 
 	return ctx.SendString("Hello, Login Page!")
@@ -41,13 +38,20 @@ func (controller *AuthController) SignUp(ctx *fiber.Ctx) error {
 	payload := dto.SignUpPaylod{}
 	ctx.BodyParser(&payload)
 
-	err := controller.authService.SignUp(payload)
+	userId, err := controller.authService.SignUp(payload)
 
 	if err != nil {
 		return err
 	}
 
-	return ctx.SendString("Hello, Sign Up Page!")
+	return ctx.
+		Status(fiber.StatusCreated).
+		JSON(
+			dto.SignUpResponse{
+				UserId:  userId,
+				Message: "User created successfully",
+			},
+		)
 }
 
 func (controller *AuthController) Register(app *fiber.App) {

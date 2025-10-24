@@ -7,19 +7,29 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type EnvConfiguration struct {
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
-	DBSSLMode  string
+type ServerConfig struct {
+	Port string
 }
 
-func NewEnvironment() *EnvConfiguration {
+type DatabaseConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	Name     string
+	SSLMode  string
+}
+type Config struct {
+	Server   ServerConfig
+	Database DatabaseConfig
+
+	HashSalt  string
+	JwtSecret string
+}
+
+func New() Config {
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("No .env file found or error loading .env file")
-		return nil
 	}
 
 	dbHost := os.Getenv("DB_HOST")
@@ -29,23 +39,44 @@ func NewEnvironment() *EnvConfiguration {
 	dbName := os.Getenv("DB_NAME")
 	dbSSLMode := os.Getenv("DB_SSLMODE")
 
-	return &EnvConfiguration{
-		DBHost:     dbHost,
-		DBPort:     dbPort,
-		DBUser:     dbUser,
-		DBPassword: dbPassword,
-		DBName:     dbName,
-		DBSSLMode:  dbSSLMode,
+	hashSalt := os.Getenv("HASH_SALT")
+	jwtSecret := os.Getenv("JWT_SECRET")
+
+	serverPort := os.Getenv("SERVER_PORT")
+
+	if hashSalt == "" {
+		hashSalt = "10"
+	}
+
+	if serverPort == "" {
+		serverPort = "3000"
+	}
+
+	return Config{
+		Database: DatabaseConfig{
+			Host:     dbHost,
+			Port:     dbPort,
+			User:     dbUser,
+			Password: dbPassword,
+			Name:     dbName,
+			SSLMode:  dbSSLMode,
+		},
+		Server: ServerConfig{
+			Port: serverPort,
+		},
+
+		HashSalt:  hashSalt,
+		JwtSecret: jwtSecret,
 	}
 }
 
-func (env *EnvConfiguration) FormatDatabaseURL() string {
+func (env *Config) FormatDatabaseURL() string {
 	return fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s",
-		env.DBUser,
-		env.DBPassword,
-		env.DBHost,
-		env.DBPort,
-		env.DBName,
-		env.DBSSLMode,
+		env.Database.User,
+		env.Database.Password,
+		env.Database.Host,
+		env.Database.Port,
+		env.Database.Name,
+		env.Database.SSLMode,
 	)
 }
