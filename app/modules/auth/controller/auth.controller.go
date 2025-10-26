@@ -1,12 +1,12 @@
 package auth
 
 import (
+	"github.com/gofiber/fiber/v2"
+
 	"boilerplate/app/common"
 	"boilerplate/app/middleware"
 	dto "boilerplate/app/models/dto"
 	as "boilerplate/app/modules/auth/service"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 var _ common.IController = &AuthController{}
@@ -25,13 +25,13 @@ func (controller *AuthController) SignIn(ctx *fiber.Ctx) error {
 	payload := dto.LoginPaylod{}
 	ctx.BodyParser(&payload)
 
-	err := controller.authService.SignIn(payload)
+	response, err := controller.authService.SignIn(payload)
 
 	if err != nil {
 		return err
 	}
 
-	return ctx.SendString("Hello, Login Page!")
+	return ctx.Status(fiber.StatusOK).JSON(response)
 }
 
 func (controller *AuthController) SignUp(ctx *fiber.Ctx) error {
@@ -56,14 +56,18 @@ func (controller *AuthController) SignUp(ctx *fiber.Ctx) error {
 
 func (controller *AuthController) Register(app *fiber.App) {
 
-	app.Post(
+	group := app.Group("/auth")
+
+	group.Post(
 		"/login",
 		middleware.BodyValidator[dto.LoginPaylod](),
 		controller.SignIn,
 	)
-	app.Post(
+	group.Post(
 		"/signup",
 		middleware.BodyValidator[dto.SignUpPaylod](),
 		controller.SignUp,
 	)
+
+	common.Logger.Info("Auth controller registered successfully")
 }

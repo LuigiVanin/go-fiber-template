@@ -18,6 +18,7 @@ func New() *fiber.App {
 		AllowMethods: "GET, POST, PUT, DELETE, OPTIONS",
 	}))
 	app.Use(middleware.Json)
+	app.Use(middleware.RequestLogger)
 
 	return app
 }

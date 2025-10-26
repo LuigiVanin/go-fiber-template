@@ -1,12 +1,14 @@
 package database
 
 import (
-	"boilerplate/infra/database/entity"
 	"fmt"
 
 	_ "github.com/lib/pq"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"boilerplate/infra/database/entity"
 )
 
 func CreateConnection(url string) (*gorm.DB, error) {

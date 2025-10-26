@@ -15,3 +15,8 @@ type SignUpResponse struct {
 	UserId  uint   `json:"user_id"`
 	Message string `json:"message"`
 }
+
+type SignInResponse struct {
+	Token string `json:"token"`
+	User  User   `json:"user"`
+}

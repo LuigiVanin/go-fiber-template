@@ -9,6 +9,7 @@ var HttpErrorMap = map[GlobalErrorCode]int{
 
 	// 401
 	UnauthorizedErrorCode: fiber.StatusUnauthorized,
+	TokenExpiredErrorCode: fiber.StatusUnauthorized,
 
 	// 409
 	ConflictErrorCode:     fiber.StatusConflict,

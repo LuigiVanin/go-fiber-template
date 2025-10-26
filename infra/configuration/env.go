@@ -20,11 +20,12 @@ type DatabaseConfig struct {
 	SSLMode  string
 }
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-
-	HashSalt  string
-	JwtSecret string
+	Server     ServerConfig
+	Database   DatabaseConfig
+	HashSalt   string
+	JwtSecret  string
+	JwtExpTime string
+	Env        string
 }
 
 func New() Config {
@@ -41,15 +42,25 @@ func New() Config {
 
 	hashSalt := os.Getenv("HASH_SALT")
 	jwtSecret := os.Getenv("JWT_SECRET")
+	jwtExpTime := os.Getenv("JWT_EXP_TIME")
 
 	serverPort := os.Getenv("SERVER_PORT")
+	env := os.Getenv("ENV")
 
 	if hashSalt == "" {
 		hashSalt = "10"
 	}
 
+	if jwtExpTime == "" {
+		jwtExpTime = "3600"
+	}
+
 	if serverPort == "" {
 		serverPort = "3000"
+	}
+
+	if env == "" {
+		env = "production"
 	}
 
 	return Config{
@@ -61,12 +72,15 @@ func New() Config {
 			Name:     dbName,
 			SSLMode:  dbSSLMode,
 		},
+
 		Server: ServerConfig{
 			Port: serverPort,
 		},
 
-		HashSalt:  hashSalt,
-		JwtSecret: jwtSecret,
+		HashSalt:   hashSalt,
+		JwtSecret:  jwtSecret,
+		JwtExpTime: jwtExpTime,
+		Env:        env,
 	}
 }
 

@@ -63,6 +63,15 @@ func ThorwUnauthorizedError(detail string) *GlobalError {
 	}
 }
 
+func ThrowTokenExpiredError(detail string) *GlobalError {
+	return &GlobalError{
+		Title:  "Token Expired",
+		Code:   TokenExpiredErrorCode,
+		Detail: detail,
+		Type:   "https://example.com/errors/token-expired",
+	}
+}
+
 func ThrowUnprocessableEntity(detail string) *GlobalError {
 
 	return &GlobalError{
