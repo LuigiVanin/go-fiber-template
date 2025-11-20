@@ -25,6 +25,7 @@ type Config struct {
 	HashSalt   string
 	JwtSecret  string
 	JwtExpTime string
+	AppName    string
 	Env        string
 }
 
@@ -44,6 +45,7 @@ func New() Config {
 	jwtSecret := os.Getenv("JWT_SECRET")
 	jwtExpTime := os.Getenv("JWT_EXP_TIME")
 
+	name := os.Getenv("APP_NAME")
 	serverPort := os.Getenv("SERVER_PORT")
 	env := os.Getenv("ENV")
 
@@ -80,7 +82,9 @@ func New() Config {
 		HashSalt:   hashSalt,
 		JwtSecret:  jwtSecret,
 		JwtExpTime: jwtExpTime,
-		Env:        env,
+
+		AppName: name,
+		Env:     env,
 	}
 }
 

@@ -1,13 +1,14 @@
 package hash
 
-import "boilerplate/infra/configuration"
+import (
+	"go.uber.org/fx"
+)
 
-type HashBcryptModule struct {
-	HashService IHashService
-}
-
-func NewHashBcryptModule(config configuration.Config) *HashBcryptModule {
-	return &HashBcryptModule{
-		HashService: New(config),
-	}
-}
+var Module = fx.Module("hash",
+	fx.Provide(
+		fx.Annotate(
+			NewHashBcryptService,
+			fx.As(new(IHashService)),
+		),
+	),
+)

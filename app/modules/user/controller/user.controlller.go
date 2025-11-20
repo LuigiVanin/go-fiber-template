@@ -5,19 +5,20 @@ import (
 	"go.uber.org/zap"
 
 	"boilerplate/app/common"
+	"boilerplate/app/middleware/guard"
 	"boilerplate/app/models/dto"
 	us "boilerplate/app/modules/user/service"
 )
 
 type UserController struct {
 	userService us.IUserService
-	authGuard   common.IGuard
+	authGuard   *guard.AuthGuard
 	logger      *zap.Logger
 }
 
 var _ common.IController = &UserController{}
 
-func New(authGuard common.IGuard, userService us.IUserService, logger *zap.Logger) *UserController {
+func NewUserController(authGuard *guard.AuthGuard, userService us.IUserService, logger *zap.Logger) *UserController {
 	return &UserController{
 		userService: userService,
 		authGuard:   authGuard,

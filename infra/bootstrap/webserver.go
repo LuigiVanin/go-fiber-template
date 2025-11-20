@@ -2,12 +2,8 @@ package bootstrap
 
 import (
 	"boilerplate/app/middleware"
-	"boilerplate/app/modules/auth"
-	"boilerplate/app/modules/user"
-	ur "boilerplate/app/modules/user/repository"
 	"boilerplate/infra/configuration"
 
-	// "boilerplate/infra/database"
 	"context"
 	"fmt"
 
@@ -18,11 +14,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewHttpServer(logger *zap.Logger) *fiber.App {
+func NewHttpServer(logger *zap.Logger, config configuration.Config) *fiber.App {
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: middleware.NewErrorHandler(logger),
-		AppName:      "Boilerplate API",
+		AppName:      config.AppName,
+		ServerHeader: config.AppName,
 	})
 
 	app.Use(cors.New(cors.Config{
@@ -40,9 +37,6 @@ func Start(
 	server *fiber.App,
 	config configuration.Config,
 	client *gorm.DB,
-	userRepository *ur.UserRepository,
-	userModule *user.UserModule,
-	authModule *auth.AuthModule,
 	log *zap.Logger,
 ) {
 
@@ -61,9 +55,6 @@ func Start(
 				}
 
 				log.Info("Database migrated successfully!")
-
-				userModule.Register()
-				authModule.Register()
 
 				log.Info("Starting server...",
 					zap.String("port", config.Server.Port),

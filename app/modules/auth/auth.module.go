@@ -3,40 +3,23 @@ package auth
 import (
 	controller "boilerplate/app/modules/auth/controller"
 	"boilerplate/app/modules/auth/service"
-	"boilerplate/app/modules/hash"
-	"boilerplate/app/modules/jwt"
-	userRepository "boilerplate/app/modules/user/repository"
 
 	"github.com/gofiber/fiber/v2"
-	"go.uber.org/zap"
+	"go.uber.org/fx"
 )
 
-type AuthModule struct {
-	server         *fiber.App
-	authController *controller.AuthController
-}
+var Module = fx.Module("auth",
 
-func NewAuthModule(
-	server *fiber.App,
-	hashModule *hash.HashBcryptModule,
-	jwtModule *jwt.JwtModule,
-	userRepository *userRepository.UserRepository,
-	logger *zap.Logger,
-) *AuthModule {
-
-	return &AuthModule{
-		server: server,
-		authController: controller.New(
-			service.New(
-				hashModule.HashService,
-				jwtModule.JwtService,
-				userRepository,
-			),
-			logger,
+	fx.Provide(
+		fx.Annotate(
+			service.New,
+			fx.As(new(service.IAuthService)),
 		),
-	}
-}
+	),
 
-func (module *AuthModule) Register() {
-	module.authController.Register(module.server)
-}
+	fx.Provide(controller.NewAuthController),
+
+	fx.Invoke(func(server *fiber.App, controller *controller.AuthController) {
+		controller.Register(server)
+	}),
+)

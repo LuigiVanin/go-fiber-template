@@ -23,9 +23,9 @@ type AuthGuard struct {
 	userRepository ur.IUserRepository
 }
 
-func NewAuthGuard(jwtModule *js.JwtModule, userRepository *ur.UserRepository) *AuthGuard {
+func NewAuthGuard(jwtService js.IJwtService, userRepository ur.IUserRepository) *AuthGuard {
 	return &AuthGuard{
-		jwtService:     jwtModule.JwtService,
+		jwtService:     jwtService,
 		userRepository: userRepository,
 	}
 }

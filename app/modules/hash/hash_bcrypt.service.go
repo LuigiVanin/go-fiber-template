@@ -11,7 +11,7 @@ type HashBcryptService struct {
 	cfg configuration.Config
 }
 
-func New(cfg configuration.Config) *HashBcryptService {
+func NewHashBcryptService(cfg configuration.Config) *HashBcryptService {
 	return &HashBcryptService{
 		cfg: cfg,
 	}

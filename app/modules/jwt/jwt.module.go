@@ -1,13 +1,14 @@
 package jwt
 
-import "boilerplate/infra/configuration"
+import (
+	"go.uber.org/fx"
+)
 
-type JwtModule struct {
-	JwtService IJwtService
-}
-
-func NewJwtModule(config configuration.Config) *JwtModule {
-	return &JwtModule{
-		JwtService: New(config),
-	}
-}
+var Module = fx.Module("jwt",
+	fx.Provide(
+		fx.Annotate(
+			NewJwtService,
+			fx.As(new(IJwtService)),
+		),
+	),
+)

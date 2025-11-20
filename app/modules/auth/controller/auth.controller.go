@@ -17,7 +17,7 @@ type AuthController struct {
 
 var _ common.IController = &AuthController{}
 
-func New(authService as.IAuthService, log *zap.Logger) *AuthController {
+func NewAuthController(authService as.IAuthService, log *zap.Logger) *AuthController {
 	return &AuthController{
 		authService: authService,
 		log:         log,

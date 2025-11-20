@@ -1,32 +1,32 @@
 package user
 
 import (
-	"boilerplate/app/middleware/guard"
 	"boilerplate/app/modules/user/controller"
 	"boilerplate/app/modules/user/repository"
 	"boilerplate/app/modules/user/service"
 
 	"github.com/gofiber/fiber/v2"
-	"go.uber.org/zap"
+	"go.uber.org/fx"
 )
 
-type UserModule struct {
-	server         *fiber.App
-	userController *controller.UserController
-	userService    service.IUserService
-}
+var Module = fx.Module("user",
+	fx.Provide(
+		fx.Annotate(
+			repository.NewUserRepository,
+			fx.As(new(repository.IUserRepository)),
+		),
+	),
 
-func NewUserModule(server *fiber.App, userRepository *repository.UserRepository, authGuard *guard.AuthGuard, logger *zap.Logger) *UserModule {
-	userService := service.New(userRepository)
-	userController := controller.New(authGuard, userService, logger)
+	fx.Provide(
+		fx.Annotate(
+			service.NewUserService,
+			fx.As(new(service.IUserService)),
+		),
+	),
 
-	return &UserModule{
-		server:         server,
-		userController: userController,
-		userService:    userService,
-	}
-}
+	fx.Provide(controller.NewUserController),
 
-func (module *UserModule) Register() {
-	module.userController.Register(module.server)
-}
+	fx.Invoke(func(server *fiber.App, controller *controller.UserController) {
+		controller.Register(server)
+	}),
+)
