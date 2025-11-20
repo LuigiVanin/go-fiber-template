@@ -6,6 +6,7 @@ import (
 
 	"context"
 	"fmt"
+	"net"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -56,12 +57,19 @@ func Start(
 
 				log.Info("Database migrated successfully!")
 
+				addr := fmt.Sprintf(":%s", config.Server.Port)
+				ln, err := net.Listen("tcp", addr)
+				if err != nil {
+					log.Error("Failed to bind to port", zap.Error(err))
+					return err
+				}
+
 				log.Info("Starting server...",
 					zap.String("port", config.Server.Port),
 					zap.String("env", config.Env),
 				)
 				go func() {
-					err := server.Listen(fmt.Sprintf(":%s", config.Server.Port))
+					err := server.Listener(ln)
 					if err != nil {
 						log.Error("Error starting server", zap.Error(err))
 					}

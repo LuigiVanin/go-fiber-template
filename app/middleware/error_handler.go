@@ -48,7 +48,7 @@ func NewErrorHandler(logger *zap.Logger) fiber.ErrorHandler {
 					"detail":   validationErr.Error(),
 					"instance": instance,
 					"errors":   validationErr.List,
-					"code":     string(e.BadRequestCode),
+					"code":     string(e.UnprocessableEntityErrorCode),
 				},
 			)
 		}
