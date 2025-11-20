@@ -1,7 +1,8 @@
-package auth
+package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 
 	"boilerplate/app/common"
 	"boilerplate/app/middleware"
@@ -9,15 +10,17 @@ import (
 	as "boilerplate/app/modules/auth/service"
 )
 
-var _ common.IController = &AuthController{}
-
 type AuthController struct {
 	authService as.IAuthService
+	log         *zap.Logger
 }
 
-func New(authService as.IAuthService) *AuthController {
+var _ common.IController = &AuthController{}
+
+func New(authService as.IAuthService, log *zap.Logger) *AuthController {
 	return &AuthController{
 		authService: authService,
+		log:         log,
 	}
 }
 
@@ -69,5 +72,5 @@ func (controller *AuthController) Register(app *fiber.App) {
 		controller.SignUp,
 	)
 
-	common.Logger.Info("Auth controller registered successfully")
+	controller.log.Info("Auth controller registered successfully")
 }

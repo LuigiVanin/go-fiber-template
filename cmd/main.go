@@ -1,62 +1,55 @@
 package main
 
 import (
-	"fmt"
+	"context"
 
-	bootstrap "boilerplate/app"
-	"boilerplate/app/common"
-	authService "boilerplate/app/modules/auth/service"
-	hashBcryptService "boilerplate/app/modules/hash"
-	jwtService "boilerplate/app/modules/jwt"
-	logger "boilerplate/infra"
-
-	authGuard "boilerplate/app/middleware/guard"
-
+	"boilerplate/app/middleware/guard"
+	"boilerplate/app/modules/auth"
+	"boilerplate/app/modules/hash"
+	"boilerplate/app/modules/jwt"
+	"boilerplate/app/modules/user"
 	userRepository "boilerplate/app/modules/user/repository"
-	userService "boilerplate/app/modules/user/service"
+	"boilerplate/infra/bootstrap"
+	cfg "boilerplate/infra/configuration"
 
-	authController "boilerplate/app/modules/auth/controller"
-	userController "boilerplate/app/modules/user/controller"
-
-	"boilerplate/infra/configuration"
-	"boilerplate/infra/database"
-
-	"go.uber.org/zap"
+	"go.uber.org/fx"
 )
 
 func main() {
-	cfg := configuration.New()
-	common.Logger = logger.New(cfg.Env)
+	// Create config and logger outside of fx to reuse for fx.WithLogger
+	config := cfg.New()
+	logger := bootstrap.NewZapLogger(config.Env)
 
-	app := bootstrap.New()
+	fx.New(
+		// fx.WithLogger(func() fxevent.Logger {
+		// 	return &fxevent.ZapLogger{Logger: zapLogger}
+		// }),
 
-	client := database.New(
-		cfg.FormatDatabaseURL(),
-	)
+		// Resources
+		fx.Supply(config),
+		fx.Supply(logger),
+		fx.Provide(bootstrap.NewDatabaseClient),
+		fx.Provide(bootstrap.NewHttpServer),
 
-	err := database.Migrate(client)
+		// Services Modules
+		fx.Provide(hash.NewHashBcryptModule),
+		fx.Provide(jwt.NewJwtModule),
 
-	if err != nil {
-		common.Logger.Error("Failed to migrate database: ", zap.Error(err))
-		return
-	}
+		// Global Assets
+		fx.Provide(userRepository.New),
+		fx.Provide(guard.NewAuthGuard),
 
-	common.Logger.Info("Database migrated successfully")
+		// Modules
+		fx.Provide(user.NewUserModule),
+		fx.Provide(auth.NewAuthModule),
 
-	userRepository := userRepository.New(client)
-
-	jwtService := jwtService.New(cfg)
-	hashService := hashBcryptService.New(cfg)
-	authService := authService.New(hashService, jwtService, userRepository)
-	userService := userService.New(userRepository)
-
-	authGuard := authGuard.New(jwtService, userRepository)
-
-	authController := authController.New(authService)
-	userController := userController.New(authGuard, userService)
-
-	authController.Register(app)
-	userController.Register(app)
-
-	app.Listen(fmt.Sprintf(":%s", cfg.Server.Port))
+		fx.Invoke(bootstrap.Start),
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{
+				OnStop: func(ctx context.Context) error {
+					return logger.Sync()
+				},
+			})
+		}),
+	).Run()
 }

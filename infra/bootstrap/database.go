@@ -1,4 +1,4 @@
-package database
+package bootstrap
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"boilerplate/infra/configuration"
 	"boilerplate/infra/database/entity"
 )
 
@@ -31,8 +32,8 @@ func Migrate(db *gorm.DB) error {
 	return err
 }
 
-func New(url string) *gorm.DB {
-	client, err := CreateConnection(url)
+func NewDatabaseClient(config configuration.Config) *gorm.DB {
+	client, err := CreateConnection(config.FormatDatabaseURL())
 
 	if err != nil {
 		fmt.Printf("Failed to connect to database: %v", err)
