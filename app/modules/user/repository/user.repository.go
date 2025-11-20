@@ -1,4 +1,4 @@
-package user
+package repository
 
 import (
 	"boilerplate/infra/database/entity"
@@ -10,7 +10,7 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
-func New(db *gorm.DB) *UserRepository {
+func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{db: db}
 }
 

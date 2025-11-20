@@ -1,4 +1,4 @@
-package logger
+package bootstrap
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func New(env string) *zap.Logger {
+func NewZapLogger(env string) *zap.Logger {
 	var config zap.Config
 
 	if env == "development" {

@@ -1,62 +1,45 @@
 package main
 
 import (
-	"fmt"
+	"context"
 
-	bootstrap "boilerplate/app"
-	"boilerplate/app/common"
-	authService "boilerplate/app/modules/auth/service"
-	hashBcryptService "boilerplate/app/modules/hash"
-	jwtService "boilerplate/app/modules/jwt"
-	logger "boilerplate/infra"
+	"boilerplate/app/middleware/guard"
+	"boilerplate/app/modules/auth"
+	"boilerplate/app/modules/hash"
+	"boilerplate/app/modules/jwt"
+	"boilerplate/app/modules/user"
+	"boilerplate/infra/bootstrap"
+	cfg "boilerplate/infra/configuration"
 
-	authGuard "boilerplate/app/middleware/guard"
-
-	userRepository "boilerplate/app/modules/user/repository"
-	userService "boilerplate/app/modules/user/service"
-
-	authController "boilerplate/app/modules/auth/controller"
-	userController "boilerplate/app/modules/user/controller"
-
-	"boilerplate/infra/configuration"
-	"boilerplate/infra/database"
-
-	"go.uber.org/zap"
+	"go.uber.org/fx"
 )
 
 func main() {
-	cfg := configuration.New()
-	common.Logger = logger.New(cfg.Env)
+	config := cfg.New()
+	logger := bootstrap.NewZapLogger(config.Env)
 
-	app := bootstrap.New()
+	fx.New(
+		fx.Supply(config),
+		fx.Supply(logger),
+		fx.Provide(bootstrap.NewDatabaseClient),
+		fx.Provide(bootstrap.NewHttpServer),
 
-	client := database.New(
-		cfg.FormatDatabaseURL(),
-	)
+		// Guards
+		fx.Provide(guard.NewAuthGuard),
 
-	err := database.Migrate(client)
+		// Modules
+		hash.Module,
+		jwt.Module,
+		user.Module,
+		auth.Module,
 
-	if err != nil {
-		common.Logger.Error("Failed to migrate database: ", zap.Error(err))
-		return
-	}
-
-	common.Logger.Info("Database migrated successfully")
-
-	userRepository := userRepository.New(client)
-
-	jwtService := jwtService.New(cfg)
-	hashService := hashBcryptService.New(cfg)
-	authService := authService.New(hashService, jwtService, userRepository)
-	userService := userService.New(userRepository)
-
-	authGuard := authGuard.New(jwtService, userRepository)
-
-	authController := authController.New(authService)
-	userController := userController.New(authGuard, userService)
-
-	authController.Register(app)
-	userController.Register(app)
-
-	app.Listen(fmt.Sprintf(":%s", cfg.Server.Port))
+		fx.Invoke(bootstrap.Start),
+		fx.Invoke(func(lc fx.Lifecycle) {
+			lc.Append(fx.Hook{
+				OnStop: func(ctx context.Context) error {
+					return logger.Sync()
+				},
+			})
+		}),
+	).Run()
 }

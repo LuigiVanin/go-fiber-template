@@ -1,24 +1,28 @@
-package user
+package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"go.uber.org/zap"
 
 	"boilerplate/app/common"
+	"boilerplate/app/middleware/guard"
 	"boilerplate/app/models/dto"
 	us "boilerplate/app/modules/user/service"
 )
 
 type UserController struct {
 	userService us.IUserService
-	authGuard   common.IGuard
+	authGuard   *guard.AuthGuard
+	logger      *zap.Logger
 }
 
 var _ common.IController = &UserController{}
 
-func New(authGuard common.IGuard, userService us.IUserService) *UserController {
+func NewUserController(authGuard *guard.AuthGuard, userService us.IUserService, logger *zap.Logger) *UserController {
 	return &UserController{
 		userService: userService,
 		authGuard:   authGuard,
+		logger:      logger,
 	}
 }
 
@@ -43,5 +47,5 @@ func (controller *UserController) Register(app *fiber.App) {
 		controller.GetCurrent,
 	)
 
-	common.Logger.Info("User controller registered successfully")
+	controller.logger.Info("User controller registered successfully")
 }
